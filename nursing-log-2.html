@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <meta name="theme-color" content="#fdf6f0"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-title" content="Nursing Log"/>
+  <title>Nursing Log</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--cream:#fdf6f0;--blush:#f5d6c8;--rose:#e8a090;--deep-rose:#c96a58;--left:#5a8fa8;--left-bg:rgba(168,197,218,0.2);--right:#c96a58;--right-bg:rgba(245,196,184,0.35);--text:#3a2e2a;--soft:#8a7570;--white:#fff;--shadow:rgba(58,46,42,0.08)}
+    html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--text);overflow-x:hidden}
+    body{display:flex;flex-direction:column;min-height:100vh;max-width:440px;margin:0 auto}
+    .hdr{padding:22px 20px 12px;text-align:center;background:var(--cream);border-bottom:1px solid rgba(232,160,144,0.2);position:sticky;top:0;z-index:10}
+    .hdr h1{font-family:'DM Serif Display',serif;font-size:26px;letter-spacing:.3px}
+    .hdr h1 em{font-style:italic;color:var(--deep-rose)}
+    .hdr .date{font-size:13px;color:var(--soft);margin-top:3px}
+    .sync-badge{font-size:11px;color:#b8a09a;margin-top:3px}
+    .tabs{display:flex;margin:14px 16px 0;background:var(--blush);border-radius:14px;padding:4px;gap:4px}
+    .tab{flex:1;padding:9px 4px;border:none;background:transparent;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--soft);cursor:pointer;transition:all .2s}
+    .tab.on{background:var(--white);color:var(--text);box-shadow:0 2px 8px var(--shadow)}
+    .content{flex:1;padding:18px 16px 40px;overflow-y:auto}
+    .panel{display:none}.panel.on{display:block}
+    .banner{display:none;align-items:center;gap:10px;padding:11px 14px;border-radius:13px;border:1.5px solid;margin-bottom:14px}
+    .banner.show{display:flex}
+    .bdot{width:8px;height:8px;border-radius:50%;animation:blink 1s infinite;flex-shrink:0}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+    .breast-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+    .bb{padding:20px 12px;border:2.5px solid rgba(200,180,175,0.25);border-radius:20px;background:var(--white);cursor:pointer;text-align:center;box-shadow:0 2px 12px var(--shadow);transition:all .2s;font-family:inherit}
+    .bb .icon{font-size:34px;display:block;margin-bottom:7px}
+    .bb .lbl{font-family:'DM Serif Display',serif;font-size:18px;display:block;margin-bottom:2px}
+    .bb .sub{font-size:11px;color:var(--soft)}
+    .bb.left.sel{border-color:var(--left);background:var(--left-bg)}
+    .bb.right.sel{border-color:var(--right);background:var(--right-bg)}
+    .bb:disabled{opacity:.6;cursor:default}
+    .timer-card{background:var(--white);border-radius:22px;padding:26px 22px;box-shadow:0 4px 20px var(--shadow);text-align:center;margin-bottom:18px}
+    .t-lbl{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--soft);margin-bottom:10px}
+    .t-num{font-family:'DM Serif Display',serif;font-size:64px;letter-spacing:-2px;line-height:1;margin-bottom:7px;transition:color .3s;color:var(--text)}
+    .t-num.left{color:var(--left)}.t-num.right{color:var(--right)}
+    .t-sub{font-size:13px;color:var(--soft);margin-bottom:20px;min-height:20px}
+    .btn-row{display:flex;gap:12px}
+    .btn-start,.btn-stop{flex:1;padding:15px;border:none;border-radius:50px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .18s}
+    .btn-start{background:linear-gradient(135deg,var(--deep-rose),#d4796a);color:#fff;box-shadow:0 4px 16px rgba(201,106,88,.3)}
+    .btn-start.left{background:linear-gradient(135deg,var(--left),#7aaec0);box-shadow:0 4px 16px rgba(90,143,168,.3)}
+    .btn-stop{background:var(--blush);color:var(--text)}
+    .btn-start:disabled,.btn-stop:disabled{opacity:.45;cursor:default}
+    .btn-start:active:not(:disabled),.btn-stop:active:not(:disabled){transform:scale(.96)}
+    .manual{background:var(--white);border-radius:20px;padding:18px;box-shadow:0 2px 12px var(--shadow);margin-bottom:18px}
+    .manual h3{font-family:'DM Serif Display',serif;font-size:17px;margin-bottom:14px}
+    .inp-row{display:flex;gap:10px}
+    .ig{display:flex;flex-direction:column;gap:4px;flex:1}
+    .ig label{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--soft)}
+    .ig input,.ig select{padding:10px;border:1.5px solid var(--blush);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--cream);color:var(--text);outline:none}
+    .ig input:focus,.ig select:focus{border-color:var(--rose)}
+    .btn-add{margin-top:14px;width:100%;background:linear-gradient(135deg,var(--deep-rose),#d4796a);color:#fff;border:none;border-radius:12px;padding:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer}
+    .btn-add:active{transform:scale(.97)}
+    .mini-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px}
+    .mc{border-radius:16px;padding:14px 10px;text-align:center}
+    .mc.tot{background:linear-gradient(135deg,var(--deep-rose),#d4796a)}
+    .mc.left{background:var(--left-bg)}.mc.right{background:var(--right-bg)}
+    .mc-num{font-family:'DM Serif Display',serif;font-size:20px}
+    .mc.tot .mc-num{color:#fff}.mc.left .mc-num{color:var(--left)}.mc.right .mc-num{color:var(--right)}
+    .mc-lbl{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;margin-top:3px;color:var(--soft)}
+    .mc.tot .mc-lbl{color:rgba(255,255,255,.8)}
+    .log-title{font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:12px}
+    .entry-list{display:flex;flex-direction:column;gap:10px}
+    .entry{background:var(--white);border-radius:16px;padding:13px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px var(--shadow);animation:slideIn .25s ease}
+    @keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .edot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .edot.left{background:var(--left)}.edot.right{background:var(--right)}
+    .e-title{font-size:14px;font-weight:600}.e-time{font-size:12px;color:var(--soft);margin-top:1px}
+    .e-dur{font-family:'DM Serif Display',serif;font-size:18px}
+    .e-del{background:none;border:none;font-size:14px;cursor:pointer;color:var(--soft);padding:4px;opacity:.5}
+    .empty{text-align:center;padding:40px 20px;color:var(--soft);font-size:14px;line-height:1.7}
+    .empty .ei{font-size:48px;margin-bottom:12px}
+    .sum-card{background:var(--white);border-radius:22px;padding:22px 20px;box-shadow:0 4px 20px var(--shadow);margin-bottom:18px}
+    .sum-card h2{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:4px}
+    .sum-sub{font-size:13px;color:var(--soft);margin-bottom:18px}
+    .stat-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid rgba(232,160,144,.15)}
+    .stat-row:last-of-type{border-bottom:none}
+    .stat-lbl{font-size:14px;color:var(--soft);display:flex;align-items:center;gap:8px}
+    .sdot{width:8px;height:8px;border-radius:50%;display:inline-block}
+    .sdot.left{background:var(--left)}.sdot.right{background:var(--right)}.sdot.tot{background:var(--deep-rose)}
+    .stat-val{font-family:'DM Serif Display',serif;font-size:19px}
+    .prog-wrap{margin-top:16px}
+    .prog-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--soft);margin-bottom:6px}
+    .prog-bar{height:10px;border-radius:10px;background:var(--blush);overflow:hidden;display:flex}
+    .prog-left{background:var(--left);border-radius:10px 0 0 10px;transition:width .5s}
+    .prog-right{background:var(--right);border-radius:0 10px 10px 0;transition:width .5s}
+    .btn-share{width:100%;background:linear-gradient(135deg,var(--deep-rose),#d4796a);color:#fff;border:none;border-radius:16px;padding:17px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(201,106,88,.3);margin-bottom:10px;display:block}
+    .btn-share:active{transform:scale(.97)}
+    .btn-clear{width:100%;background:none;border:1.5px solid var(--blush);color:var(--soft);border-radius:14px;padding:12px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer}
+    .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:#3a2e2a;color:#fff;padding:12px 22px;border-radius:50px;font-size:14px;font-weight:500;z-index:100;transition:transform .3s;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+    .toast.show{transform:translateX(-50%) translateY(0)}
+  </style>
+</head>
+<body>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  const firebaseConfig = {
+    apiKey: "AIzaSyBlV7zy-whb3rEXzw_jqXiIFArdDeEv45g",
+    authDomain: "nursing-8c061.firebaseapp.com",
+    databaseURL: "https://nursing-8c061-default-rtdb.firebaseio.com",
+    projectId: "nursing-8c061",
+    storageBucket: "nursing-8c061.firebasestorage.app",
+    messagingSenderId: "665547745077",
+    appId: "1:665547745077:web:0b9133111ee97de4288e7c"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const entriesRef = ref(db, "nursingLog/entries");
+  window._fbSave = (data) => set(entriesRef, data);
+  window._fbListen = (cb) => onValue(entriesRef, snap => cb(snap.val()));
+  window._fbReady = true;
+  window.dispatchEvent(new Event("fbready"));
+</script>
+
+<div class="hdr">
+  <h1>Nursing <em>Log</em></h1>
+  <div class="date" id="dateEl"></div>
+  <div class="sync-badge">🔄 Synced between both phones</div>
+</div>
+
+<div class="tabs">
+  <button class="tab on" onclick="switchTab('track',this)">🤱 Track</button>
+  <button class="tab" onclick="switchTab('log',this)">📋 Today</button>
+  <button class="tab" onclick="switchTab('summary',this)">📊 Summary</button>
+</div>
+
+<div class="content">
+  <div class="panel on" id="panel-track">
+    <div class="banner" id="banner"><div class="bdot" id="bdot"></div><span id="bannerTxt"><strong>Session running</strong></span></div>
+    <div class="breast-row">
+      <button class="bb left" id="btnLeft" onclick="selBreast('left')"><span class="icon">🫧</span><span class="lbl">Left</span><span class="sub" id="subLeft">tap to select</span></button>
+      <button class="bb right" id="btnRight" onclick="selBreast('right')"><span class="icon">🫧</span><span class="lbl">Right</span><span class="sub" id="subRight">tap to select</span></button>
+    </div>
+    <div class="timer-card">
+      <div class="t-lbl">Session Timer</div>
+      <div class="t-num" id="tNum">00:00</div>
+      <div class="t-sub" id="tSub">Select a breast to begin</div>
+      <div class="btn-row">
+        <button class="btn-start" id="btnStart" onclick="startSession()" disabled>▶ Start</button>
+        <button class="btn-stop" id="btnStop" onclick="stopSession()" disabled>■ Stop</button>
+      </div>
+    </div>
+    <div class="manual">
+      <h3>Add Manually</h3>
+      <div class="inp-row">
+        <div class="ig"><label>Time</label><input type="time" id="mTime"/></div>
+        <div class="ig"><label>Side</label><select id="mBreast"><option value="left">Left</option><option value="right">Right</option></select></div>
+        <div class="ig" style="min-width:65px"><label>Mins</label><input type="number" id="mDur" min="1" max="120" placeholder="10"/></div>
+      </div>
+      <button class="btn-add" onclick="addManual()">+ Add Entry</button>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-log">
+    <div class="mini-grid">
+      <div class="mc tot"><div class="mc-num" id="mTot">0m</div><div class="mc-lbl">Total</div></div>
+      <div class="mc left"><div class="mc-num" id="mLeft">0m</div><div class="mc-lbl">Left</div></div>
+      <div class="mc right"><div class="mc-num" id="mRight">0m</div><div class="mc-lbl">Right</div></div>
+    </div>
+    <div class="log-title">Today's Sessions</div>
+    <div class="entry-list" id="entryList"></div>
+  </div>
+
+  <div class="panel" id="panel-summary">
+    <div class="sum-card">
+      <h2>Daily Summary</h2>
+      <div class="sum-sub" id="sumDate"></div>
+      <div class="stat-row"><span class="stat-lbl"><span class="sdot tot"></span>Total Sessions</span><span class="stat-val" id="sTot">0</span></div>
+      <div class="stat-row"><span class="stat-lbl"><span class="sdot tot"></span>Total Time</span><span class="stat-val" id="sTime">0 min</span></div>
+      <div class="stat-row"><span class="stat-lbl"><span class="sdot left"></span>Left Breast</span><span class="stat-val" id="sLeft">0 min</span></div>
+      <div class="stat-row"><span class="stat-lbl"><span class="sdot right"></span>Right Breast</span><span class="stat-val" id="sRight">0 min</span></div>
+      <div class="prog-wrap">
+        <div class="prog-labels"><span id="progLblL">Left 50%</span><span id="progLblR">Right 50%</span></div>
+        <div class="prog-bar"><div class="prog-left" id="progL" style="width:50%"></div><div class="prog-right" id="progR" style="width:50%"></div></div>
+      </div>
+    </div>
+    <button class="btn-share" onclick="shareSummary()">📤 Share Daily Log</button>
+    <button class="btn-clear" onclick="clearDay()">🗑 Clear Today's Data</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let entries=[],selSide=null,running=false,startTs=null,timerIv=null,toastTm=null;
+  const pad=n=>String(n).padStart(2,'0');
+  const todayStr=()=>new Date().toISOString().split('T')[0];
+  const todayEntries=()=>entries.filter(e=>e.ts&&e.ts.startsWith(todayStr())).sort((a,b)=>new Date(a.ts)-new Date(b.ts));
+  const fmtS=m=>!m?'0m':m<60?m+'m':Math.floor(m/60)+'h '+m%60+'m';
+  const fmtL=m=>!m?'0 min':m<60?m+' min':(m%60?Math.floor(m/60)+'h '+m%60+'min':Math.floor(m/60)+'h');
+  const stats=l=>l.reduce((a,e)=>({total:a.total+e.dur,left:a.left+(e.breast==='left'?e.dur:0),right:a.right+(e.breast==='right'?e.dur:0)}),{total:0,left:0,right:0});
+
+  function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTm);toastTm=setTimeout(()=>el.classList.remove('show'),2800)}
+
+  function save(ne){entries=ne;if(window._fbSave)window._fbSave(ne);else localStorage.setItem('nl',JSON.stringify(ne));render()}
+
+  function initStorage(){
+    if(window._fbReady){
+      window._fbListen(d=>{entries=d?Object.values(d):[];render()});
+    } else {
+      try{entries=JSON.parse(localStorage.getItem('nl')||'[]')}catch(e){entries=[]}
+      render();
+    }
+  }
+  window.addEventListener('fbready',initStorage);
+  setTimeout(()=>{if(!window._fbReady)initStorage()},3000);
+
+  const now=new Date();
+  document.getElementById('dateEl').textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  document.getElementById('sumDate').textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  document.getElementById('mTime').value=pad(now.getHours())+':'+pad(now.getMinutes());
+
+  function selBreast(side){
+    if(running)return;selSide=side;
+    document.getElementById('btnLeft').classList.toggle('sel',side==='left');
+    document.getElementById('btnRight').classList.toggle('sel',side==='right');
+    document.getElementById('btnStart').disabled=false;
+    document.getElementById('btnStart').className='btn-start'+(side==='left'?' left':'');
+    document.getElementById('tSub').textContent='🫧 '+side+' breast selected';
+    document.getElementById('subLeft').textContent=side==='left'?'selected':'tap to select';
+    document.getElementById('subRight').textContent=side==='right'?'selected':'tap to select';
+  }
+
+  function startSession(){
+    if(!selSide||running)return;
+    running=true;startTs=Date.now();
+    document.getElementById('btnStart').disabled=true;
+    document.getElementById('btnStop').disabled=false;
+    document.getElementById('tNum').className='t-num '+selSide;
+    document.getElementById('tSub').textContent='🫧 '+selSide+' breast — session running';
+    const b=document.getElementById('banner');
+    b.classList.add('show');
+    b.style.borderColor=selSide==='left'?'rgba(90,143,168,.5)':'rgba(201,106,88,.5)';
+    b.style.background=selSide==='left'?'rgba(90,143,168,.08)':'rgba(201,106,88,.08)';
+    document.getElementById('bdot').style.background=selSide==='left'?'#5a8fa8':'#c96a58';
+    document.getElementById('bannerTxt').innerHTML='<strong>Session running</strong> — '+selSide+' breast';
+    timerIv=setInterval(()=>{
+      const e=Math.floor((Date.now()-startTs)/1000);
+      document.getElementById('tNum').textContent=pad(Math.floor(e/60))+':'+pad(e%60);
+    },1000);
+  }
+
+  function stopSession(){
+    if(!running)return;
+    clearInterval(timerIv);
+    const dur=Math.max(1,Math.round((Date.now()-startTs)/60000));
+    const t=new Date();
+    const ts=t.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    save([...entries,{id:Date.now(),breast:selSide,time:ts,dur,ts:t.toISOString()}]);
+    running=false;startTs=null;
+    document.getElementById('btnStart').disabled=false;
+    document.getElementById('btnStop').disabled=true;
+    document.getElementById('tNum').textContent='00:00';
+    document.getElementById('tNum').className='t-num';
+    document.getElementById('banner').classList.remove('show');
+    document.getElementById('tSub').textContent='🫧 '+selSide+' breast selected';
+    toast('✓ '+dur+'m '+selSide+' session saved');
+  }
+
+  function addManual(){
+    const time=document.getElementById('mTime').value,breast=document.getElementById('mBreast').value,dur=parseInt(document.getElementById('mDur').value);
+    if(!time){toast('Enter a time');return}
+    if(!dur||dur<1){toast('Enter duration in minutes');return}
+    const[h,m]=time.split(':');const d=new Date();d.setHours(parseInt(h),parseInt(m),0);
+    const ts=d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    save([...entries,{id:Date.now(),breast,time:ts,dur,ts:d.toISOString()}]);
+    document.getElementById('mDur').value='';
+    toast('✓ '+dur+'m '+breast+' entry added');
+  }
+
+  function deleteEntry(id){save(entries.filter(e=>e.id!==id));toast('Entry removed')}
+
+  function render(){
+    const td=todayEntries(),st=stats(td);
+    document.getElementById('mTot').textContent=fmtS(st.total);
+    document.getElementById('mLeft').textContent=fmtS(st.left);
+    document.getElementById('mRight').textContent=fmtS(st.right);
+    const list=document.getElementById('entryList');
+    if(td.length===0){
+      list.innerHTML='<div class="empty"><div class="ei">🤱</div><p>No sessions yet today.<br/>Start a timer or add one manually.</p></div>';
+    } else {
+      list.innerHTML=td.map(e=>`<div class="entry"><div class="edot ${e.breast}"></div><div style="flex:1"><div class="e-title">${e.breast==='left'?'← Left':'Right →'} breast</div><div class="e-time">${e.time}</div></div><div class="e-dur">${e.dur}m</div><button class="e-del" onclick="deleteEntry(${e.id})">✕</button></div>`).join('');
+    }
+    const lp=st.total>0?Math.round(st.left/st.total*100):50,rp=100-lp;
+    document.getElementById('sTot').textContent=td.length+' sessions';
+    document.getElementById('sTime').textContent=fmtL(st.total);
+    document.getElementById('sLeft').textContent=fmtL(st.left);
+    document.getElementById('sRight').textContent=fmtL(st.right);
+    document.getElementById('progL').style.width=lp+'%';
+    document.getElementById('progR').style.width=rp+'%';
+    document.getElementById('progLblL').textContent='Left '+lp+'%';
+    document.getElementById('progLblR').textContent='Right '+rp+'%';
+  }
+
+  function shareSummary(){
+    const td=todayEntries(),st=stats(td),date=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+    let txt='🤱 Nursing Log — '+date+'\n'+'─'.repeat(30)+'\n'+'Total Sessions: '+td.length+'\nTotal Time: '+fmtL(st.total)+'\nLeft Breast: '+fmtL(st.left)+'\nRight Breast: '+fmtL(st.right)+'\n'+'─'.repeat(30)+'\n';
+    td.forEach((e,i)=>{txt+=(i+1)+'. '+e.time+'  '+(e.breast==='left'?'Left ←':'Right →')+'  '+e.dur+' min\n'});
+    if(navigator.share)navigator.share({title:'Nursing Log',text:txt});
+    else navigator.clipboard.writeText(txt).then(()=>toast('📋 Copied!'));
+  }
+
+  async function clearDay(){
+    if(!confirm("Clear all of today's entries?"))return;
+    save(entries.filter(e=>!e.ts?.startsWith(todayStr())));
+    toast("Today's data cleared");
+  }
+
+  function switchTab(name,btn){
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+    document.getElementById('panel-'+name).classList.add('on');
+    btn.classList.add('on');
+  }
+</script>
+</body>
+</html>
