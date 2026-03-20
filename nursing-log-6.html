@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <meta name="theme-color" content="#fdf6f0"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-title" content="Nursing Log"/>
+  <title>Nursing Log</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --cream:#fdf6f0;--blush:#f5d6c8;--rose:#e8a090;--deep-rose:#c96a58;
+      --left:#5a8fa8;--left-bg:rgba(168,197,218,0.2);
+      --right:#c96a58;--right-bg:rgba(245,196,184,0.35);
+      --syringe:#7a9e7e;--syringe-bg:rgba(122,158,126,0.15);
+      --nappy:#9b7eba;--nappy-bg:rgba(155,126,186,0.15);
+      --wet:#5a9ab8;--wet-bg:rgba(90,154,184,0.15);
+      --dirty:#a07840;--dirty-bg:rgba(160,120,64,0.15);
+      --both:#7a9e7e;--both-bg:rgba(122,158,126,0.15);
+      --text:#3a2e2a;--soft:#8a7570;--white:#fff;--shadow:rgba(58,46,42,0.08);
+      --card:#fff;--input-bg:#fdf6f0;--tab-bg:#f5d6c8;--border:rgba(200,180,175,0.25);
+    }
+    body.dark{
+      --cream:#1a1412;--blush:#2a1f1b;--rose:#7a4a3a;--deep-rose:#e07060;
+      --left:#5a9ab8;--left-bg:rgba(90,154,184,0.15);
+      --right:#e07060;--right-bg:rgba(224,112,96,0.15);
+      --syringe:#6a9e6e;--syringe-bg:rgba(106,158,110,0.15);
+      --nappy:#b090d0;--nappy-bg:rgba(176,144,208,0.15);
+      --wet:#5a9ab8;--wet-bg:rgba(90,154,184,0.15);
+      --dirty:#c09850;--dirty-bg:rgba(192,152,80,0.15);
+      --both:#6a9e6e;--both-bg:rgba(106,158,110,0.15);
+      --text:#f0e8e0;--soft:#8a7a70;--white:#2a1f1b;--shadow:rgba(0,0,0,0.3);
+      --card:#231a16;--input-bg:#1a1210;--tab-bg:#2a1f1b;--border:rgba(100,70,60,0.3);
+    }
+    html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--text);overflow-x:hidden;transition:background .3s,color .3s}
+    body{display:flex;flex-direction:column;min-height:100vh;max-width:440px;margin:0 auto}
+
+    /* HEADER */
+    .hdr{padding:18px 20px 12px;background:var(--cream);border-bottom:1px solid rgba(232,160,144,0.15);position:sticky;top:0;z-index:10;transition:background .3s;display:flex;align-items:center;justify-content:space-between}
+    .hdr-center{text-align:center;flex:1}
+    .hdr h1{font-family:'DM Serif Display',serif;font-size:26px;letter-spacing:.3px}
+    .hdr h1 em{font-style:italic;color:var(--deep-rose)}
+    .hdr .date{font-size:13px;color:var(--soft);margin-top:3px}
+    .sync-badge{font-size:11px;color:var(--soft);margin-top:3px;opacity:.7}
+    .night-btn{background:none;border:1.5px solid var(--border);border-radius:50px;padding:7px 12px;font-size:16px;cursor:pointer;color:var(--text);transition:all .2s;flex-shrink:0;line-height:1}
+    .night-btn:active{transform:scale(.92)}
+
+    /* TABS */
+    .tabs{display:flex;margin:14px 16px 0;background:var(--tab-bg);border-radius:14px;padding:4px;gap:3px;transition:background .3s}
+    .tab{flex:1;padding:9px 2px;border:none;background:transparent;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;color:var(--soft);cursor:pointer;transition:all .2s}
+    .tab.on{background:var(--card);color:var(--text);box-shadow:0 2px 8px var(--shadow)}
+
+    .content{flex:1;padding:18px 16px 40px;overflow-y:auto}
+    .panel{display:none}.panel.on{display:block}
+
+    /* BANNER */
+    .banner{display:none;align-items:center;gap:10px;padding:11px 14px;border-radius:13px;border:1.5px solid;margin-bottom:14px}
+    .banner.show{display:flex}
+    .bdot{width:8px;height:8px;border-radius:50%;animation:blink 1s infinite;flex-shrink:0}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+    /* BREAST BUTTONS */
+    .breast-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .bb{padding:18px 12px;border:2.5px solid var(--border);border-radius:20px;background:var(--card);cursor:pointer;text-align:center;box-shadow:0 2px 12px var(--shadow);transition:all .2s;font-family:inherit}
+    .bb .icon{font-size:30px;display:block;margin-bottom:6px}
+    .bb .lbl{font-family:'DM Serif Display',serif;font-size:17px;display:block;margin-bottom:2px;color:var(--text)}
+    .bb .sub{font-size:11px;color:var(--soft)}
+    .bb.left.sel{border-color:var(--left);background:var(--left-bg)}
+    .bb.right.sel{border-color:var(--right);background:var(--right-bg)}
+    .bb.syringe-btn{border-color:var(--border)}
+    .bb.syringe-btn.sel{border-color:var(--syringe);background:var(--syringe-bg)}
+    .bb:disabled{opacity:.6;cursor:default}
+    .syringe-row{margin-bottom:18px}
+
+    /* TIMER */
+    .timer-card{background:var(--card);border-radius:22px;padding:22px;box-shadow:0 4px 20px var(--shadow);text-align:center;margin-bottom:18px;transition:background .3s}
+    .t-lbl{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--soft);margin-bottom:10px}
+    .t-num{font-family:'DM Serif Display',serif;font-size:60px;letter-spacing:-2px;line-height:1;margin-bottom:7px;transition:color .3s;color:var(--text)}
+    .t-num.left{color:var(--left)}.t-num.right{color:var(--right)}
+    .t-sub{font-size:13px;color:var(--soft);margin-bottom:14px;min-height:20px}
+    .timer-notes-label{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--soft);margin-bottom:5px;display:none;text-align:left}
+    .timer-notes{width:100%;padding:10px 12px;border:1.5px solid var(--blush);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--input-bg);color:var(--text);outline:none;resize:none;margin-bottom:14px;transition:all .2s;display:none}
+    .timer-notes:focus{border-color:var(--rose)}
+    .btn-row{display:flex;gap:12px}
+    .btn-start,.btn-stop{flex:1;padding:15px;border:none;border-radius:50px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .18s}
+    .btn-start{background:linear-gradient(135deg,var(--deep-rose),#d4796a);color:#fff;box-shadow:0 4px 16px rgba(201,106,88,.3)}
+    .btn-start.left{background:linear-gradient(135deg,var(--left),#7aaec0);box-shadow:0 4px 16px rgba(90,143,168,.3)}
+    .btn-stop{background:var(--blush);color:var(--text)}
+    .btn-start:disabled,.btn-stop:disabled{opacity:.45;cursor:default}
+    .btn-start:active:not(:disabled),.btn-stop:active:not(:disabled){transform:scale(.96)}
+
+    /* SYRINGE */
+    .syringe-quick{background:var(--card);border-radius:20px;padding:16px 18px;box-shadow:0 2px 12px var(--shadow);margin-bottom:18px;display:none;transition:background .3s}
+    .syringe-quick.show{display:block}
+    .syringe-quick h3{font-family:'DM Serif Display',serif;font-size:16px;margin-bottom:12px;color:var(--text)}
+    .syringe-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .sq-btn{padding:10px 16px;border:1.5px solid var(--syringe);border-radius:50px;background:var(--syringe-bg);color:var(--syringe);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .18s}
+    .sq-btn:active{transform:scale(.95);background:var(--syringe);color:#fff}
+
+    /* MANUAL / CARDS */
+    .card{background:var(--card);border-radius:20px;padding:18px;box-shadow:0 2px 12px var(--shadow);margin-bottom:18px;transition:background .3s}
+    .card h3{font-family:'DM Serif Display',serif;font-size:17px;margin-bottom:14px;color:var(--text)}
+    .inp-row{display:flex;gap:10px}
+    .ig{display:flex;flex-direction:column;gap:4px;flex:1}
+    .ig label{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--soft)}
+    .ig input,.ig select,.ig textarea{padding:10px;border:1.5px solid var(--blush);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--input-bg);color:var(--text);outline:none;transition:all .2s}
+    .ig textarea{resize:none;font-size:13px}
+    .ig input:focus,.ig select:focus,.ig textarea:focus{border-color:var(--rose)}
+    .notes-row{margin-top:10px}
+    .btn-add{margin-top:12px;width:100%;background:linear-gradient(135deg,var(--deep-rose),#d4796a);color:#fff;border:none;border-radius:12px;padding:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer}
+    .btn-add:active{transform:scale(.97)}
+    .btn-add.nappy-add{background:linear-gradient(135deg,var(--nappy),#b090d0)}
+
+    /* MINI GRIDS */
+    .mini-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:18px}
+    .mini-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px}
+    .mc{border-radius:14px;padding:12px 8px;text-align:center}
+    .mc.tot{background:linear-gradient(135deg,var(--deep-rose),#d4796a)}
+    .mc.left{background:var(--left-bg)}.mc.right{background:var(--right-bg)}.mc.syr{background:var(--syringe-bg)}
+    .mc.nap{background:linear-gradient(135deg,var(--nappy),#b090d0)}
+    .mc.wet{background:var(--wet-bg)}.mc.dirty{background:var(--dirty-bg)}.mc.both{background:var(--both-bg)}
+    .mc-num{font-family:'DM Serif Display',serif;font-size:17px}
+    .mc.tot .mc-num,.mc.nap .mc-num{color:#fff}
+    .mc.left .mc-num{color:var(--left)}.mc.right .mc-num{color:var(--right)}.mc.syr .mc-num{color:var(--syringe)}
+    .mc.wet .mc-num{color:var(--wet)}.mc.dirty .mc-num{color:var(--dirty)}.mc.both .mc-num{color:var(--both)}
+    .mc-lbl{font-size:9px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;margin-top:3px;color:var(--soft)}
+    .mc.tot .mc-lbl,.mc.nap .mc-lbl{color:rgba(255,255,255,.8)}
+
+    /* LOG TITLE */
+    .log-title{font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:12px;color:var(--text)}
+    .log-section{margin-bottom:24px}
+
+    /* ENTRIES */
+    .entry-list{display:flex;flex-direction:column;gap:10px}
+    .entry{background:var(--card);border-radius:16px;padding:13px 14px;display:flex;align-items:flex-start;gap:12px;box-shadow:0 2px 8px var(--shadow);animation:slideIn .25s ease;transition:background .3s}
+    @keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .edot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+    .edot.left{background:var(--left)}.edot.right{background:var(--right)}.edot.syringe{background:var(--syringe)}
+    .edot.wet{background:var(--wet)}.edot.dirty{background:var(--dirty)}.edot.both{background:var(--both)}
+    .e-title{font-size:14px;font-weight:600;color:var(--text)}.e-time{font-size:12px;color:var(--soft);margin-top:1px}
+    .e-note{font-size:12px;color:var(--soft);margin-top:4px;font-style:italic;line-height:1.4}
+    .e-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+    .e-dur{font-family:'DM Serif Display',serif;font-size:18px;color:var(--text)}
+    .e-del{background:none;border:none;font-size:14px;cursor:pointer;color:var(--soft);padding:2px;opacity:.5}
+    .empty{text-align:center;padding:32px 20px;color:var(--soft);font-size:14px;line-height:1.7}
+    .empty .ei{font-size:40px;margin-bottom:10px}
+
+    /* NAPPY TYPE SELECTOR */
+    .nappy-type-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+    .ntype-btn{padding:14px 8px;border:2.5px solid var(--border);border-radius:16px;background:var(--card);cursor:pointer;text-align:center;font-family:inherit;transition:all .2s;box-shadow:0 2px 8px var(--shadow)}
+    .ntype-btn .nicon{font-size:26px;display:block;margin-bottom:5px}
+    .ntype-btn .nlbl{font-size:12px;font-weight:600;color:var(--text)}
+    .ntype-btn.sel-wet{border-color:var(--wet);background:var(--wet-bg)}
+    .ntype-btn.sel-dirty{border-color:var(--dirty);background:var(--dirty-bg)}
+    .ntype-btn.sel-both{border-color:var(--both);background:var(--both-bg)}
+
+    /* COLOUR SELECTOR */
+    .colour-section{margin-bottom:14px;display:none}
+    .colour-section.show{display:block}
+    .colour-label{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--soft);margin-bottom:8px;display:block}
+    .colour-row{display:flex;gap:8px;flex-wrap:wrap}
+    .col-btn{padding:8px 12px;border:1.5px solid var(--border);border-radius:50px;background:var(--card);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--text);transition:all .18s;display:flex;align-items:center;gap:5px}
+    .col-btn.selected{border-width:2px;font-weight:700}
+    .col-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+    /* SUMMARY */
+    .sum-card{background:var(--card);border-radius:22px;padding:22px 20px;box-shadow:0 4px 20px var(--shadow);margin-bottom:18px;transition:background .3s}
+    .sum-card h2{font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:4px;color:var(--text)}
+    .sum-sub{font-size:13px;color:var(--soft);margin-bottom:16px}
+    .stat-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(130,80,60,0.08)}
+    .stat-row:last-of-type{border-bottom:none}
+    .stat-lbl{font-size:14px;color:var(--soft);display:flex;align-items:center;gap:8px}
+    .sdot{width:8px;height:8px;border-radius:50%;display:inline-block}
+    .sdot.left{background:var(--left)}.sdot.right{background:var(--right)}.sdot.tot{background:var(--deep-rose)}
+    .sdot.syr{background:var(--syringe)}.sdot.nap{background:var(--nappy)}
+    .sdot.wet{background:var(--wet)}.sdot.dirty{background:var(--dirty)}.sdot.both{background:var(--both)}
+    .stat-val{font-family:'DM Serif Display',serif;font-size:19px;color:var(--text)}
+    .prog-wrap{margin-top:14px}
+    .prog-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--soft);margin-bottom:6px}
+    .prog-bar{height:10px;border-radius:10px;background:var(--blush);overflow:hidden;display:flex}
+    .prog-left{background:var(--left);border-radius:10px 0 0 10px;transition:width .5s}
+    .prog-right{background:var(--right);border-radius:0 10px 10px 0;transition:width .5s}
+    .sum-divider{height:1px;background:var(--blush);margin:18px 0}
+    .btn-share{width:100%;background:linear-gradient(135deg,var(--deep-rose),#d4796a);color:#fff;border:none;border-radius:16px;padding:17px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(201,106,88,.3);margin-bottom:10px;display:block}
+    .btn-share:active{transform:scale(.97)}
+    .btn-clear{width:100%;background:none;border:1.5px solid var(--blush);color:var(--soft);border-radius:14px;padding:12px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;margin-bottom:8px}
+
+    /* CALENDAR */
+    .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .cal-header h2{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text)}
+    .cal-nav{background:none;border:1.5px solid var(--blush);border-radius:10px;padding:6px 12px;font-size:18px;cursor:pointer;color:var(--text)}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:20px}
+    .cal-day-label{text-align:center;font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--soft);padding:4px 0}
+    .cal-day{border-radius:10px;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;background:transparent}
+    .cal-day.empty{cursor:default}
+    .cal-day.has-data{background:var(--card);box-shadow:0 1px 6px var(--shadow)}
+    .cal-day.today{border:2px solid var(--deep-rose)}
+    .cal-day.selected{background:var(--deep-rose)!important;box-shadow:0 2px 10px rgba(201,106,88,.3)}
+    .cal-day.selected .cal-day-num{color:#fff!important}
+    .cal-day.selected .dot{background:rgba(255,255,255,.7)!important}
+    .cal-day-num{font-size:13px;font-weight:600;color:var(--text);line-height:1}
+    .cal-day.empty .cal-day-num{color:var(--soft);font-weight:400}
+    .cal-dot-row{display:flex;gap:2px;margin-top:3px;flex-wrap:wrap;justify-content:center;max-width:28px}
+    .dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+    .dot.left{background:var(--left)}.dot.right{background:var(--right)}.dot.syringe{background:var(--syringe)}
+    .dot.wet{background:var(--wet)}.dot.dirty{background:var(--dirty)}.dot.both{background:var(--both)}
+    .history-detail{background:var(--card);border-radius:20px;padding:20px;box-shadow:0 2px 16px var(--shadow);transition:background .3s}
+    .history-detail h3{font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:4px;color:var(--text)}
+    .history-detail .hd-sub{font-size:12px;color:var(--soft);margin-bottom:16px}
+    .hd-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+    .hd-stat{background:var(--input-bg);border-radius:12px;padding:10px 12px}
+    .hd-stat-val{font-family:'DM Serif Display',serif;font-size:18px}
+    .hd-stat-lbl{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--soft);margin-top:2px}
+    .hd-entries{display:flex;flex-direction:column;gap:8px}
+    .hd-entry{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:var(--input-bg);border-radius:12px}
+    .hd-note{font-size:11px;color:var(--soft);margin-top:3px;font-style:italic}
+    .hd-section-title{font-family:'DM Serif Display',serif;font-size:15px;color:var(--text);margin:14px 0 8px}
+
+    /* COLOUR BADGE */
+    .colour-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--soft);margin-top:2px}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:var(--cream);padding:12px 22px;border-radius:50px;font-size:14px;font-weight:500;z-index:100;transition:transform .3s,background .3s;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+    .toast.show{transform:translateX(-50%) translateY(0)}
+  </style>
+</head>
+<body>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  const firebaseConfig = {
+    apiKey: "AIzaSyBlV7zy-whb3rEXzw_jqXiIFArdDeEv45g",
+    authDomain: "nursing-8c061.firebaseapp.com",
+    databaseURL: "https://nursing-8c061-default-rtdb.firebaseio.com",
+    projectId: "nursing-8c061",
+    storageBucket: "nursing-8c061.firebasestorage.app",
+    messagingSenderId: "665547745077",
+    appId: "1:665547745077:web:0b9133111ee97de4288e7c"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const feedRef = ref(db, "nursingLog/entries");
+  const nappyRef = ref(db, "nursingLog/nappies");
+  window._fbSaveFeed = (d) => set(feedRef, d);
+  window._fbSaveNappy = (d) => set(nappyRef, d);
+  window._fbListenFeed = (cb) => onValue(feedRef, s => cb(s.val()));
+  window._fbListenNappy = (cb) => onValue(nappyRef, s => cb(s.val()));
+  window._fbReady = true;
+  window.dispatchEvent(new Event("fbready"));
+</script>
+
+<div class="hdr">
+  <div style="width:48px"></div>
+  <div class="hdr-center">
+    <h1>Nursing <em>Log</em></h1>
+    <div class="date" id="dateEl"></div>
+    <div class="sync-badge">🔄 Synced between both phones</div>
+  </div>
+  <button class="night-btn" id="nightBtn" onclick="toggleDark()">🌙</button>
+</div>
+
+<div class="tabs">
+  <button class="tab on" onclick="switchTab('track',this)">🤱 Feed</button>
+  <button class="tab" onclick="switchTab('nappy',this)">🧷 Nappy</button>
+  <button class="tab" onclick="switchTab('log',this)">📋 Today</button>
+  <button class="tab" onclick="switchTab('summary',this)">📊 Summary</button>
+  <button class="tab" onclick="switchTab('history',this)">📅 History</button>
+</div>
+
+<div class="content">
+
+  <!-- FEED TRACK -->
+  <div class="panel on" id="panel-track">
+    <div class="banner" id="banner"><div class="bdot" id="bdot"></div><span id="bannerTxt"><strong>Session running</strong></span></div>
+    <div class="breast-row">
+      <button class="bb left" id="btnLeft" onclick="selBreast('left')"><span class="icon">🫧</span><span class="lbl">Left</span><span class="sub" id="subLeft">tap to select</span></button>
+      <button class="bb right" id="btnRight" onclick="selBreast('right')"><span class="icon">🫧</span><span class="lbl">Right</span><span class="sub" id="subRight">tap to select</span></button>
+    </div>
+    <div class="syringe-row">
+      <button class="bb syringe-btn" id="btnSyringe" onclick="selBreast('syringe')" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 18px">
+        <span style="font-size:24px">💉</span>
+        <span><span class="lbl" style="font-size:16px;display:block;text-align:left">Syringe</span><span class="sub" style="display:block;text-align:left" id="subSyringe">tap to log ml</span></span>
+      </button>
+    </div>
+    <div class="syringe-quick" id="syringeQuick">
+      <h3>💉 Log Syringe Feed</h3>
+      <div class="syringe-btns">
+        <button class="sq-btn" onclick="addSyringe(1)">+1 ml</button>
+        <button class="sq-btn" onclick="addSyringe(2)">+2 ml</button>
+        <button class="sq-btn" onclick="addSyringe(3)">+3 ml</button>
+        <button class="sq-btn" onclick="addSyringe(5)">+5 ml</button>
+        <button class="sq-btn" onclick="addSyringe(10)">+10 ml</button>
+      </div>
+      <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--soft);margin-bottom:5px;display:block">Note (optional)</label>
+      <textarea style="width:100%;padding:10px;border:1.5px solid var(--blush);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--input-bg);color:var(--text);outline:none;resize:none" id="syringeNote" rows="2" placeholder="e.g. after feed, before bath…"></textarea>
+    </div>
+    <div class="timer-card" id="timerCard">
+      <div class="t-lbl">Session Timer</div>
+      <div class="t-num" id="tNum">00:00</div>
+      <div class="t-sub" id="tSub">Select a breast to begin</div>
+      <label class="timer-notes-label" id="timerNotesLabel">Note (optional)</label>
+      <textarea class="timer-notes" id="timerNote" rows="2" placeholder="e.g. fussy, good latch, sleepy…"></textarea>
+      <div class="btn-row">
+        <button class="btn-start" id="btnStart" onclick="startSession()" disabled>▶ Start</button>
+        <button class="btn-stop" id="btnStop" onclick="stopSession()" disabled>■ Stop</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Add Manually</h3>
+      <div class="inp-row">
+        <div class="ig"><label>Time</label><input type="time" id="mTime"/></div>
+        <div class="ig"><label>Type</label>
+          <select id="mBreast" onchange="updateManualLabel()">
+            <option value="left">Left</option>
+            <option value="right">Right</option>
+            <option value="syringe">Syringe</option>
+          </select>
+        </div>
+        <div class="ig" style="min-width:60px"><label id="mDurLabel">Mins</label><input type="number" id="mDur" min="1" max="120" placeholder="10"/></div>
+      </div>
+      <div class="notes-row"><div class="ig"><label>Note (optional)</label><textarea id="mNote" rows="2" placeholder="e.g. good feed, very hungry…"></textarea></div></div>
+      <button class="btn-add" onclick="addManual()">+ Add Entry</button>
+    </div>
+  </div>
+
+  <!-- NAPPY TAB -->
+  <div class="panel" id="panel-nappy">
+    <div class="card">
+      <h3>🧷 Log Nappy Change</h3>
+
+      <!-- Type -->
+      <label style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--soft);margin-bottom:8px;display:block">Type</label>
+      <div class="nappy-type-row">
+        <button class="ntype-btn" id="ntype-wet" onclick="selNappyType('wet')">
+          <span class="nicon">💛</span><span class="nlbl">Wet</span>
+        </button>
+        <button class="ntype-btn" id="ntype-dirty" onclick="selNappyType('dirty')">
+          <span class="nicon">💩</span><span class="nlbl">Dirty</span>
+        </button>
+        <button class="ntype-btn" id="ntype-both" onclick="selNappyType('both')">
+          <span class="nicon">💛💩</span><span class="nlbl">Both</span>
+        </button>
+      </div>
+
+      <!-- Colour picker (shown for dirty/both) -->
+      <div class="colour-section" id="colourSection">
+        <label class="colour-label">Colour (optional)</label>
+        <div class="colour-row" id="colourRow">
+          <button class="col-btn" data-colour="yellow" onclick="selColour('yellow')" style="border-color:#d4b800"><div class="col-dot" style="background:#d4b800"></div>Yellow</button>
+          <button class="col-btn" data-colour="brown" onclick="selColour('brown')" style="border-color:#8B5E3C"><div class="col-dot" style="background:#8B5E3C"></div>Brown</button>
+          <button class="col-btn" data-colour="green" onclick="selColour('green')" style="border-color:#5a8a5a"><div class="col-dot" style="background:#5a8a5a"></div>Green</button>
+          <button class="col-btn" data-colour="black" onclick="selColour('black')" style="border-color:#333"><div class="col-dot" style="background:#333"></div>Black</button>
+          <button class="col-btn" data-colour="red" onclick="selColour('red')" style="border-color:#c04040"><div class="col-dot" style="background:#c04040"></div>Red ⚠️</button>
+          <button class="col-btn" data-colour="white" onclick="selColour('white')" style="border-color:#aaa"><div class="col-dot" style="background:#ddd;border:1px solid #aaa"></div>White ⚠️</button>
+        </div>
+      </div>
+
+      <!-- Time -->
+      <div class="inp-row" style="margin-bottom:10px">
+        <div class="ig"><label>Time</label><input type="time" id="nTime"/></div>
+      </div>
+
+      <!-- Note -->
+      <div class="ig"><label>Note (optional)</label><textarea id="nNote" rows="2" placeholder="e.g. rash, unusual smell…"></textarea></div>
+
+      <button class="btn-add nappy-add" onclick="addNappy()">+ Log Nappy</button>
+    </div>
+
+    <!-- Today's nappies quick view -->
+    <div class="mini-grid-3">
+      <div class="mc wet"><div class="mc-num" id="nWetCount">0</div><div class="mc-lbl">💛 Wet</div></div>
+      <div class="mc dirty"><div class="mc-num" id="nDirtyCount">0</div><div class="mc-lbl">💩 Dirty</div></div>
+      <div class="mc both"><div class="mc-num" id="nBothCount">0</div><div class="mc-lbl">Both</div></div>
+    </div>
+
+    <div class="log-title">Today's Nappies</div>
+    <div class="entry-list" id="nappyList"></div>
+  </div>
+
+  <!-- TODAY LOG -->
+  <div class="panel" id="panel-log">
+    <div class="log-section">
+      <div class="mini-grid">
+        <div class="mc tot"><div class="mc-num" id="mTot">0m</div><div class="mc-lbl">Total</div></div>
+        <div class="mc left"><div class="mc-num" id="mLeft">0m</div><div class="mc-lbl">Left</div></div>
+        <div class="mc right"><div class="mc-num" id="mRight">0m</div><div class="mc-lbl">Right</div></div>
+        <div class="mc syr"><div class="mc-num" id="mSyr">0ml</div><div class="mc-lbl">Syringe</div></div>
+      </div>
+      <div class="log-title">Feeds</div>
+      <div class="entry-list" id="entryList"></div>
+    </div>
+    <div class="log-section">
+      <div class="mini-grid-3">
+        <div class="mc wet"><div class="mc-num" id="nWetCount2">0</div><div class="mc-lbl">💛 Wet</div></div>
+        <div class="mc dirty"><div class="mc-num" id="nDirtyCount2">0</div><div class="mc-lbl">💩 Dirty</div></div>
+        <div class="mc both"><div class="mc-num" id="nBothCount2">0</div><div class="mc-lbl">Both</div></div>
+      </div>
+      <div class="log-title">Nappies</div>
+      <div class="entry-list" id="nappyList2"></div>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="panel" id="panel-summary">
+    <div class="sum-card">
+      <h2>🤱 Feeding</h2>
+      <div class="sum-sub" id="sumDate"></div>
+      <div class="stat-row"><span class="stat-lbl"><span class="sdot tot"></span>Total Sessions</span><span class="stat-val" id="sTot">0</span></div>
+      <div class="stat-row"><span class="stat-lbl"><span class="sdot tot"></span>Total Time</span><span class="stat-val" id="sTime">0 min</span></div>
+      <div class="stat-row"><span class="stat-lbl"><span class="sdot left"></span>Left Breast</span><span class="stat-val" id="sLeft">0 min</span></div>
+      <div class="stat-row"><span class="stat-lbl"><span class="sdot right"></span>Right Breast</span><span class="stat-val" id="sRight">0 min</span></div>
+      <div class="stat-row"><span class="stat-lbl"><span class="sdot syr"></span>Syringe Total</span><span class="stat-val" id="sSyr">0 ml</span></div>
+      <div class="prog-wrap">
+        <div class="prog-labels"><span id="progLblL">Left 50%</span><span id="progLblR">Right 50%</span></div>
+        <div class="prog-bar"><div class="prog-left" id="progL" style="width:50%"></div><div class="prog-right" id="progR" style="width:50%"></div></div>
+      </div>
+    </div>
+    <div class="sum-card">
+      <h2>🧷 Nappies</h2>
+      <div class="sum-sub" id="sumDateN"></div>
+      <div class="stat-row"><span class="stat-lbl"><span class="sdot nap"></span>Total Nappies</span><span class="stat-val" id="sNapTot">0</span></div>
+      <div class="stat-row"><span class="stat-lbl"><span class="sdot wet"></span>💛 Wet</span><span class="stat-val" id="sNapWet">0</span></div>
+      <div class="stat-row"><span class="stat-lbl"><span class="sdot dirty"></span>💩 Dirty</span><span class="stat-val" id="sNapDirty">0</span></div>
+      <div class="stat-row"><span class="stat-lbl"><span class="sdot both"></span>Both</span><span class="stat-val" id="sNapBoth">0</span></div>
+    </div>
+    <button class="btn-share" onclick="shareSummary()">📤 Share Daily Log</button>
+    <button class="btn-clear" onclick="clearFeedDay()">🗑 Clear Today's Feeds</button>
+    <button class="btn-clear" onclick="clearNappyDay()">🗑 Clear Today's Nappies</button>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="panel" id="panel-history">
+    <div class="cal-header">
+      <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
+      <h2 id="calTitle"></h2>
+      <button class="cal-nav" onclick="changeMonth(1)">›</button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="history-detail" id="historyDetail" style="display:none"></div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+  let entries=[],nappies=[],selSide=null,running=false,startTs=null,timerIv=null,toastTm=null;
+  let selNType=null,selColourVal=null;
+  let calYear=new Date().getFullYear(),calMonth=new Date().getMonth(),selectedCalDay=null;
+
+  // ── Timer helpers ──
+  function tickTimer(){
+    if(!running||!startTs)return;
+    const e=Math.floor((Date.now()-startTs)/1000);
+    document.getElementById('tNum').textContent=pad(Math.floor(e/60))+':'+pad(e%60);
+  }
+  function startTicking(){
+    clearInterval(timerIv);
+    timerIv=setInterval(tickTimer,500); // 500ms so it never lags more than half a second
+    tickTimer(); // update immediately
+  }
+  // When user returns to the app, restart the interval (it may have been frozen)
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible'&&running){
+      startTicking();
+    } else {
+      clearInterval(timerIv);
+    }
+  });
+  // Persist active session so page reload recovers it
+  function saveSession(){
+    if(running&&startTs){
+      localStorage.setItem('activeSession',JSON.stringify({side:selSide,startTs}));
+    } else {
+      localStorage.removeItem('activeSession');
+    }
+  }
+  function restoreSession(){
+    const saved=localStorage.getItem('activeSession');
+    if(!saved)return;
+    try{
+      const{side,startTs:st}=JSON.parse(saved);
+      selSide=side;startTs=st;running=true;
+      selBreast(side);
+      document.getElementById('btnStart').disabled=true;
+      document.getElementById('btnStop').disabled=false;
+      document.getElementById('tNum').className='t-num '+side;
+      document.getElementById('tSub').textContent='🫧 '+side+' breast — session running';
+      document.getElementById('timerNotesLabel').style.display='block';
+      document.getElementById('timerNote').style.display='block';
+      const b=document.getElementById('banner');
+      b.classList.add('show');
+      b.style.borderColor=side==='left'?'rgba(90,143,168,.5)':'rgba(201,106,88,.5)';
+      b.style.background=side==='left'?'rgba(90,143,168,.08)':'rgba(201,106,88,.08)';
+      document.getElementById('bdot').style.background=side==='left'?'#5a8fa8':'#c96a58';
+      document.getElementById('bannerTxt').innerHTML='<strong>Session running</strong> — '+side+' breast';
+      startTicking();
+    }catch(e){localStorage.removeItem('activeSession');}
+  }
+
+  // Night mode
+  function toggleDark(){
+    const dark=document.body.classList.toggle('dark');
+    document.getElementById('nightBtn').textContent=dark?'☀️':'🌙';
+    localStorage.setItem('darkMode',dark?'1':'0');
+  }
+  if(localStorage.getItem('darkMode')==='1'){document.body.classList.add('dark');document.getElementById('nightBtn').textContent='☀️';}
+
+  // Helpers
+  const pad=n=>String(n).padStart(2,'0');
+  const todayStr=()=>new Date().toISOString().split('T')[0];
+  const forDay=(arr,day)=>arr.filter(e=>e.ts&&e.ts.startsWith(day)).sort((a,b)=>new Date(a.ts)-new Date(b.ts));
+  const todayFeeds=()=>forDay(entries,todayStr());
+  const todayNappies=()=>forDay(nappies,todayStr());
+  const fmtS=m=>!m?'0m':m<60?m+'m':Math.floor(m/60)+'h '+m%60+'m';
+  const fmtL=m=>!m?'0 min':m<60?m+' min':(m%60?Math.floor(m/60)+'h '+m%60+'min':Math.floor(m/60)+'h');
+  const feedStats=l=>l.reduce((a,e)=>({total:a.total+(e.breast!=='syringe'?e.dur:0),left:a.left+(e.breast==='left'?e.dur:0),right:a.right+(e.breast==='right'?e.dur:0),syringe:a.syringe+(e.breast==='syringe'?e.dur:0)}),{total:0,left:0,right:0,syringe:0});
+  const nappyStats=l=>l.reduce((a,n)=>({tot:a.tot+1,wet:a.wet+(n.type==='wet'?1:0),dirty:a.dirty+(n.type==='dirty'?1:0),both:a.both+(n.type==='both'?1:0)}),{tot:0,wet:0,dirty:0,both:0});
+
+  function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTm);toastTm=setTimeout(()=>el.classList.remove('show'),2800)}
+  function saveFeed(ne){entries=ne;if(window._fbSaveFeed)window._fbSaveFeed(ne);else localStorage.setItem('nl',JSON.stringify(ne));render()}
+  function saveNappy(ne){nappies=ne;if(window._fbSaveNappy)window._fbSaveNappy(ne);else localStorage.setItem('nlnappy',JSON.stringify(ne));render()}
+
+  function initStorage(){
+    if(window._fbReady){
+      window._fbListenFeed(d=>{entries=d?Object.values(d):[];render();});
+      window._fbListenNappy(d=>{nappies=d?Object.values(d):[];render();});
+    } else {
+      try{entries=JSON.parse(localStorage.getItem('nl')||'[]')}catch(e){entries=[]}
+      try{nappies=JSON.parse(localStorage.getItem('nlnappy')||'[]')}catch(e){nappies=[]}
+      render();
+    }
+  }
+  window.addEventListener('fbready',()=>{initStorage();restoreSession();});
+  setTimeout(()=>{if(!window._fbReady){initStorage();restoreSession();}},3000);
+
+  const now=new Date();
+  document.getElementById('dateEl').textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  document.getElementById('sumDate').textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  document.getElementById('sumDateN').textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  document.getElementById('mTime').value=pad(now.getHours())+':'+pad(now.getMinutes());
+  document.getElementById('nTime').value=pad(now.getHours())+':'+pad(now.getMinutes());
+
+  function updateManualLabel(){
+    const v=document.getElementById('mBreast').value;
+    document.getElementById('mDurLabel').textContent=v==='syringe'?'ml':'Mins';
+    document.getElementById('mDur').placeholder=v==='syringe'?'1':'10';
+  }
+
+  // Feed
+  function selBreast(side){
+    if(running)return;
+    selSide=side;
+    ['left','right','syringe'].forEach(s=>{
+      document.getElementById('btn'+s.charAt(0).toUpperCase()+s.slice(1)).classList.toggle('sel',side===s);
+    });
+    document.getElementById('syringeQuick').classList.toggle('show',side==='syringe');
+    document.getElementById('timerCard').style.display=side==='syringe'?'none':'block';
+    if(side!=='syringe'){
+      document.getElementById('btnStart').disabled=false;
+      document.getElementById('btnStart').className='btn-start'+(side==='left'?' left':'');
+      document.getElementById('tSub').textContent='🫧 '+side+' breast selected';
+    }
+    document.getElementById('subLeft').textContent=side==='left'?'selected':'tap to select';
+    document.getElementById('subRight').textContent=side==='right'?'selected':'tap to select';
+    document.getElementById('subSyringe').textContent=side==='syringe'?'choose amount below':'tap to log ml';
+  }
+
+  function addSyringe(ml){
+    const note=document.getElementById('syringeNote').value.trim();
+    const t=new Date(),ts=t.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    saveFeed([...entries,{id:Date.now(),breast:'syringe',time:ts,dur:ml,ts:t.toISOString(),note}]);
+    document.getElementById('syringeNote').value='';
+    toast('💉 '+ml+'ml syringe logged');
+  }
+
+  function startSession(){
+    if(!selSide||running||selSide==='syringe')return;
+    running=true;startTs=Date.now();
+    document.getElementById('btnStart').disabled=true;
+    document.getElementById('btnStop').disabled=false;
+    document.getElementById('tNum').className='t-num '+selSide;
+    document.getElementById('tSub').textContent='🫧 '+selSide+' breast — session running';
+    document.getElementById('timerNotesLabel').style.display='block';
+    document.getElementById('timerNote').style.display='block';
+    const b=document.getElementById('banner');
+    b.classList.add('show');
+    b.style.borderColor=selSide==='left'?'rgba(90,143,168,.5)':'rgba(201,106,88,.5)';
+    b.style.background=selSide==='left'?'rgba(90,143,168,.08)':'rgba(201,106,88,.08)';
+    document.getElementById('bdot').style.background=selSide==='left'?'#5a8fa8':'#c96a58';
+    document.getElementById('bannerTxt').innerHTML='<strong>Session running</strong> — '+selSide+' breast';
+    startTicking();
+    saveSession();
+  }
+
+  function stopSession(){
+    if(!running)return;
+    clearInterval(timerIv);
+    const dur=Math.max(1,Math.round((Date.now()-startTs)/60000));
+    const note=document.getElementById('timerNote').value.trim();
+    const startDate=new Date(startTs);
+    const timeStr=startDate.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    const savedSide=selSide;
+    running=false;startTs=null;
+    saveSession(); // clears localStorage
+    saveFeed([...entries,{id:Date.now(),breast:savedSide,time:timeStr,dur,ts:startDate.toISOString(),note}]);
+    document.getElementById('btnStart').disabled=false;
+    document.getElementById('btnStop').disabled=true;
+    document.getElementById('tNum').textContent='00:00';
+    document.getElementById('tNum').className='t-num';
+    document.getElementById('banner').classList.remove('show');
+    document.getElementById('tSub').textContent='🫧 '+savedSide+' breast selected';
+    document.getElementById('timerNote').value='';
+    document.getElementById('timerNote').style.display='none';
+    document.getElementById('timerNotesLabel').style.display='none';
+    toast('✓ '+dur+'m '+savedSide+' session saved');
+  }
+
+  function addManual(){
+    const time=document.getElementById('mTime').value,breast=document.getElementById('mBreast').value,dur=parseInt(document.getElementById('mDur').value),note=document.getElementById('mNote').value.trim();
+    if(!time){toast('Enter a time');return}
+    if(!dur||dur<1){toast('Enter '+(breast==='syringe'?'amount in ml':'duration in minutes'));return}
+    const[h,m]=time.split(':');const d=new Date();d.setHours(parseInt(h),parseInt(m),0);
+    const ts=d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    saveFeed([...entries,{id:Date.now(),breast,time:ts,dur,ts:d.toISOString(),note}]);
+    document.getElementById('mDur').value='';document.getElementById('mNote').value='';
+    toast('✓ '+(breast==='syringe'?dur+'ml syringe':dur+'m '+breast)+' added');
+  }
+
+  function deleteFeed(id){saveFeed(entries.filter(e=>e.id!==id));toast('Entry removed')}
+
+  // Nappy
+  const COLOURS={yellow:{hex:'#d4b800',label:'Yellow'},brown:{hex:'#8B5E3C',label:'Brown'},green:{hex:'#5a8a5a',label:'Green'},black:{hex:'#333',label:'Black'},red:{hex:'#c04040',label:'Red ⚠️'},white:{hex:'#ddd',label:'White ⚠️'}};
+
+  function selNappyType(type){
+    selNType=type;
+    ['wet','dirty','both'].forEach(t=>{
+      const btn=document.getElementById('ntype-'+t);
+      btn.className='ntype-btn'+(type===t?' sel-'+t:'');
+    });
+    const showColour=type==='dirty'||type==='both';
+    document.getElementById('colourSection').classList.toggle('show',showColour);
+    if(!showColour){selColourVal=null;document.querySelectorAll('.col-btn').forEach(b=>b.classList.remove('selected'));}
+  }
+
+  function selColour(c){
+    selColourVal=c;
+    document.querySelectorAll('.col-btn').forEach(b=>{
+      b.classList.toggle('selected',b.dataset.colour===c);
+      if(b.dataset.colour===c){b.style.borderWidth='2px';}else{b.style.borderWidth='1.5px';}
+    });
+  }
+
+  function addNappy(){
+    if(!selNType){toast('Select nappy type first');return}
+    const time=document.getElementById('nTime').value;
+    const note=document.getElementById('nNote').value.trim();
+    if(!time){toast('Enter a time');return}
+    const[h,m]=time.split(':');const d=new Date();d.setHours(parseInt(h),parseInt(m),0);
+    const ts=d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    saveNappy([...nappies,{id:Date.now(),type:selNType,colour:selColourVal,time:ts,ts:d.toISOString(),note}]);
+    document.getElementById('nNote').value='';
+    const icons={wet:'💛',dirty:'💩',both:'💛💩'};
+    toast(icons[selNType]+' Nappy logged');
+  }
+
+  function deleteNappy(id){saveNappy(nappies.filter(n=>n.id!==id));toast('Entry removed')}
+
+  // Labels
+  function feedLabel(e){
+    if(e.breast==='syringe')return{title:'💉 Syringe',val:e.dur+'ml',dot:'syringe'};
+    if(e.breast==='left')return{title:'← Left breast',val:e.dur+'m',dot:'left'};
+    return{title:'Right → breast',val:e.dur+'m',dot:'right'};
+  }
+  function nappyLabel(n){
+    const icons={wet:'💛',dirty:'💩',both:'💛💩'};
+    const labels={wet:'Wet',dirty:'Dirty',both:'Wet & Dirty'};
+    return{title:icons[n.type]+' '+labels[n.type],dot:n.type};
+  }
+
+  function colourBadge(colour){
+    if(!colour||!COLOURS[colour])return'';
+    const c=COLOURS[colour];
+    return`<span class="colour-badge"><span style="width:8px;height:8px;border-radius:50%;background:${c.hex};display:inline-block;border:1px solid rgba(0,0,0,.15)"></span>${c.label}</span>`;
+  }
+
+  // Render
+  function render(){
+    const tf=todayFeeds(),st=feedStats(tf);
+    const tn=todayNappies(),ns=nappyStats(tn);
+
+    // Feed mini grid
+    document.getElementById('mTot').textContent=fmtS(st.total);
+    document.getElementById('mLeft').textContent=fmtS(st.left);
+    document.getElementById('mRight').textContent=fmtS(st.right);
+    document.getElementById('mSyr').textContent=st.syringe+'ml';
+
+    // Feed list (appears in both Today and Nappy tabs)
+    const feedHtml=tf.length===0
+      ?'<div class="empty"><div class="ei">🤱</div><p>No feeds yet today.</p></div>'
+      :tf.map(e=>{const l=feedLabel(e);return`<div class="entry"><div class="edot ${l.dot}"></div><div style="flex:1"><div class="e-title">${l.title}</div><div class="e-time">${e.time}</div>${e.note?`<div class="e-note">📝 ${e.note}</div>`:''}</div><div class="e-right"><div class="e-dur">${l.val}</div><button class="e-del" onclick="deleteFeed(${e.id})">✕</button></div></div>`}).join('');
+    document.getElementById('entryList').innerHTML=feedHtml;
+
+    // Nappy counts
+    ['nWetCount','nWetCount2'].forEach(id=>document.getElementById(id).textContent=ns.wet);
+    ['nDirtyCount','nDirtyCount2'].forEach(id=>document.getElementById(id).textContent=ns.dirty);
+    ['nBothCount','nBothCount2'].forEach(id=>document.getElementById(id).textContent=ns.both);
+
+    // Nappy list (appears in both Nappy tab and Today tab)
+    const nappyHtml=tn.length===0
+      ?'<div class="empty"><div class="ei">🧷</div><p>No nappies logged today.</p></div>'
+      :tn.map(n=>{const l=nappyLabel(n);return`<div class="entry"><div class="edot ${l.dot}"></div><div style="flex:1"><div class="e-title">${l.title}</div><div class="e-time">${n.time}</div>${colourBadge(n.colour)}${n.note?`<div class="e-note">📝 ${n.note}</div>`:''}</div><div class="e-right"><button class="e-del" onclick="deleteNappy(${n.id})">✕</button></div></div>`}).join('');
+    ['nappyList','nappyList2'].forEach(id=>document.getElementById(id).innerHTML=nappyHtml);
+
+    // Summary
+    const lp=st.total>0?Math.round(st.left/st.total*100):50,rp=100-lp;
+    document.getElementById('sTot').textContent=tf.length+' sessions';
+    document.getElementById('sTime').textContent=fmtL(st.total);
+    document.getElementById('sLeft').textContent=fmtL(st.left);
+    document.getElementById('sRight').textContent=fmtL(st.right);
+    document.getElementById('sSyr').textContent=st.syringe+' ml';
+    document.getElementById('progL').style.width=lp+'%';
+    document.getElementById('progR').style.width=rp+'%';
+    document.getElementById('progLblL').textContent='Left '+lp+'%';
+    document.getElementById('progLblR').textContent='Right '+rp+'%';
+    document.getElementById('sNapTot').textContent=ns.tot;
+    document.getElementById('sNapWet').textContent=ns.wet;
+    document.getElementById('sNapDirty').textContent=ns.dirty;
+    document.getElementById('sNapBoth').textContent=ns.both;
+
+    renderCal();
+  }
+
+  // Calendar
+  function changeMonth(dir){
+    calMonth+=dir;
+    if(calMonth>11){calMonth=0;calYear++;}
+    if(calMonth<0){calMonth=11;calYear--;}
+    renderCal();
+  }
+
+  function renderCal(){
+    document.getElementById('calTitle').textContent=new Date(calYear,calMonth,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    let html=['Su','Mo','Tu','We','Th','Fr','Sa'].map(d=>`<div class="cal-day-label">${d}</div>`).join('');
+    const firstDay=new Date(calYear,calMonth,1).getDay();
+    const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+    const todayD=todayStr();
+    for(let i=0;i<firstDay;i++)html+=`<div class="cal-day empty"><div class="cal-day-num"></div></div>`;
+    for(let d=1;d<=daysInMonth;d++){
+      const ds=`${calYear}-${pad(calMonth+1)}-${pad(d)}`;
+      const df=entries.filter(e=>e.ts&&e.ts.startsWith(ds));
+      const dn=nappies.filter(n=>n.ts&&n.ts.startsWith(ds));
+      const hasData=df.length>0||dn.length>0;
+      const isToday=ds===todayD,isSel=ds===selectedCalDay;
+      let dots='';
+      if(df.some(e=>e.breast==='left'))dots+='<div class="dot left"></div>';
+      if(df.some(e=>e.breast==='right'))dots+='<div class="dot right"></div>';
+      if(df.some(e=>e.breast==='syringe'))dots+='<div class="dot syringe"></div>';
+      if(dn.some(n=>n.type==='wet'))dots+='<div class="dot wet"></div>';
+      if(dn.some(n=>n.type==='dirty'))dots+='<div class="dot dirty"></div>';
+      if(dn.some(n=>n.type==='both'))dots+='<div class="dot both"></div>';
+      html+=`<div class="cal-day${hasData?' has-data':''}${isToday?' today':''}${isSel?' selected':''}" onclick="selectDay('${ds}')"><div class="cal-day-num">${d}</div>${hasData?`<div class="cal-dot-row">${dots}</div>`:''}</div>`;
+    }
+    document.getElementById('calGrid').innerHTML=html;
+    if(selectedCalDay)showDayDetail(selectedCalDay);
+  }
+
+  function selectDay(ds){selectedCalDay=ds;renderCal();showDayDetail(ds);}
+
+  function showDayDetail(ds){
+    const detail=document.getElementById('historyDetail');
+    const df=forDay(entries,ds),dn=forDay(nappies,ds);
+    const st=feedStats(df),ns=nappyStats(dn);
+    const label=new Date(ds+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+    if(df.length===0&&dn.length===0){detail.style.display='block';detail.innerHTML=`<h3>${label}</h3><div class="hd-sub">No data recorded</div>`;return;}
+    const feedsHtml=df.length===0?'<div style="font-size:13px;color:var(--soft)">No feeds</div>':df.map(e=>{const l=feedLabel(e);return`<div class="hd-entry"><div class="edot ${l.dot}" style="margin-top:3px"></div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text)">${l.title}</div><div style="font-size:11px;color:var(--soft)">${e.time}</div>${e.note?`<div class="hd-note">📝 ${e.note}</div>`:''}</div><div style="font-family:'DM Serif Display',serif;font-size:16px;flex-shrink:0;color:var(--text)">${l.val}</div></div>`}).join('');
+    const napsHtml=dn.length===0?'<div style="font-size:13px;color:var(--soft)">No nappies</div>':dn.map(n=>{const l=nappyLabel(n);return`<div class="hd-entry"><div class="edot ${l.dot}" style="margin-top:3px"></div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text)">${l.title}</div><div style="font-size:11px;color:var(--soft)">${n.time}</div>${colourBadge(n.colour)}${n.note?`<div class="hd-note">📝 ${n.note}</div>`:''}</div></div>`}).join('');
+    detail.style.display='block';
+    detail.innerHTML=`
+      <h3>${label}</h3>
+      <div class="hd-stats">
+        <div class="hd-stat"><div class="hd-stat-val" style="color:var(--deep-rose)">${fmtL(st.total)}</div><div class="hd-stat-lbl">Feed time</div></div>
+        <div class="hd-stat"><div class="hd-stat-val" style="color:var(--nappy)">${ns.tot}</div><div class="hd-stat-lbl">Nappies</div></div>
+        <div class="hd-stat"><div class="hd-stat-val" style="color:var(--left)">${fmtL(st.left)}</div><div class="hd-stat-lbl">Left</div></div>
+        <div class="hd-stat"><div class="hd-stat-val" style="color:var(--right)">${fmtL(st.right)}</div><div class="hd-stat-lbl">Right</div></div>
+      </div>
+      <div class="hd-section-title">🤱 Feeds (${df.length})</div>
+      <div class="hd-entries">${feedsHtml}</div>
+      <div class="hd-section-title">🧷 Nappies (${dn.length})</div>
+      <div class="hd-entries">${napsHtml}</div>`;
+  }
+
+  function shareSummary(){
+    const tf=todayFeeds(),st=feedStats(tf),tn=todayNappies(),ns=nappyStats(tn);
+    const date=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+    let txt='🤱 Nursing & Nappy Log — '+date+'\n'+'─'.repeat(32)+'\n';
+    txt+='FEEDS\nTotal Sessions: '+tf.length+'\nTotal Time: '+fmtL(st.total)+'\nLeft: '+fmtL(st.left)+' | Right: '+fmtL(st.right)+'\nSyringe: '+st.syringe+'ml\n\n';
+    txt+='NAPPIES\nTotal: '+ns.tot+' | Wet: '+ns.wet+' | Dirty: '+ns.dirty+' | Both: '+ns.both+'\n'+'─'.repeat(32)+'\n';
+    tf.forEach((e,i)=>{const l=feedLabel(e);txt+=(i+1)+'. '+e.time+' '+l.title+' '+l.val+(e.note?' — '+e.note:'')+'\n'});
+    if(tn.length>0){txt+='\nNappies:\n';tn.forEach((n,i)=>{const l=nappyLabel(n);txt+=(i+1)+'. '+n.time+' '+l.title+(n.colour?' ('+COLOURS[n.colour]?.label+')':'')+(n.note?' — '+n.note:'')+'\n'})}
+    if(navigator.share)navigator.share({title:'Nursing Log',text:txt});
+    else navigator.clipboard.writeText(txt).then(()=>toast('📋 Copied!'));
+  }
+
+  async function clearFeedDay(){if(!confirm("Clear today's feeds?"))return;saveFeed(entries.filter(e=>!e.ts?.startsWith(todayStr())));toast("Feeds cleared")}
+  async function clearNappyDay(){if(!confirm("Clear today's nappies?"))return;saveNappy(nappies.filter(n=>!n.ts?.startsWith(todayStr())));toast("Nappies cleared")}
+
+  function switchTab(name,btn){
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+    document.getElementById('panel-'+name).classList.add('on');
+    btn.classList.add('on');
+    if(name==='history')renderCal();
+  }
+</script>
+</body>
+</html>
